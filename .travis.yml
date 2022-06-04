@@ -1,10 +1,27 @@
+# claim privilege
 sudo: required
 
+# declare docker as the type of service 
 services: 
   - docker
 
+# build the docker images 
 before_install: 
   - docker build -t jefftimes/react-ci -f Dockerfile.dev .
 
+# CI runs the test to validate the code 
 script:
   - docker run -e CI=true jefftimes/react-ci npm run test -- --coverage
+
+# CI deploys the code to aws beanstalk
+deploy:
+  provider: elasticbeanstalk
+  region: "us-east-1"
+  app: "app-with-travis-ci"
+  env: "Appwithtravisci-env"
+  bucket_name: "elasticbeanstalk-us-east-1-499805063381"
+  bucket_path: "app-with-travis-ci"
+  on: 
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
